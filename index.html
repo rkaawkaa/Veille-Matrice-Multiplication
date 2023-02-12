@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="stylesheet" href="style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebAssembly vs Javascript</title>
+  </head>
+  <body>
+    <div id="container">
+      <h1>Multiplication de matrices</h1>
+
+      <h2>Exemple d'une matrice</h2>
+
+      <table>
+        <tbody>
+          <tr>
+            <td>12.12</td>
+            <td>-34</td>
+            <td>1.95</td>
+            <td>406</td>
+            <td>532</td>
+          </tr>
+          <tr>
+            <td>-126</td>
+            <td>-0.647</td>
+            <td>-10.38</td>
+            <td>3.14</td>
+            <td>142</td>
+          </tr>
+          <tr>
+            <td>11.6</td>
+            <td>12,10</td>
+            <td>3.14</td>
+            <td>-4</td>
+            <td>8.12</td>
+          </tr>
+          <tr>
+            <td>-16</td>
+            <td>1.7</td>
+            <td>38</td>
+            <td>14</td>
+            <td>2</td>
+          </tr>
+          <tr>
+            <td>21</td>
+            <td>142,1</td>
+            <td>-22,1</td>
+            <td>-36,6</td>
+            <td>149</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p>Nous allons maintenant essayer de multiplier deux matrices avec Javascript et WebAssembly et comparer les temps de calcul.</p>
+      
+      <button class="button" id="generate">Générer les matrices</button>
+      <p class="important-text generate-matrice-text"></p>
+
+      <div class="button-container">
+        <div>     
+           <button class="button" id="js-button">Multiplier avec Javascript</button>
+          <div id="results">
+            <p class="calculating-text calculating-text-js"></p>
+            <p class="result result-js"></p>
+            <p class="result-number result-number-js"></p>
+          </div>
+        </div>
+<div class="wasm-container">    
+   <button class="button" id="wasm-button">Multiplier avec WASM</button>
+   <div id="results">
+    <p class="calculating-text calculating-text-wasm"></p>
+    <p class="result result-wasm"></p>
+    <p class="result-number result-number-wasm"></p>
+  </div></div>
+ 
+    </div>
+    <button class="button" id="compare-button">Comparer les résultats</button>
+    <div class="compare-container">    <p class="compare-text"></p></div>
+
+  </div>
+  
+  <script src="app.js"></script>
+</body>
+</html>
+
+
