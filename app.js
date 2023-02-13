@@ -12,92 +12,18 @@ let matrice2 = null;
 let elapsedTimeJavaScript = null;
 let elapsedTimeWasm = null;
 //wasm v2 step 1
-let multiplyMatricesWasm;
-
-// function loadWasm(filename) {
-//     return fetch(filename)
-//     .then(response => response.arrayBuffer())
-//     .then(bits => WebAssembly.compile(bits))
-//     .then(module=>{
-//         return new WebAssembly.Instance(module)
-//     })
-// }
-
-
-// loadWasm('add.wasm')
-// .then(instance => {
-//     multiplyMatricesWasm = instance.exports._Z3addii
-// })
-
-//Works : 
-const importObject = {
-    module: {},
-    env: {
-      memory: new WebAssembly.Memory({ initial: 256 }),
-      table: new WebAssembly.Table({ initial: 0, element: 'anyfunc' })
-    }
-  };
-fetch('multiplyMatrices.wasm')
-    .then(res => res.arrayBuffer())
-    .then(bytes => new WebAssembly.Instance(new WebAssembly.Module(bytes),importObject))
-    .then(mod => {
-    	 multiplyMatricesWasm = mod.exports._Z16multiply_matriceff;
-    });
+let multiplyMatricesWasmFunction;
 
 
 
-
-generateMatriceButton.addEventListener("click", () => {
-    const textMatrice = document.querySelector(".generate-matrice-text");
-    textMatrice.innerHTML= "Génération des matrices en cours..."
-     matrice1 = generateRandomMatrix(700, 700);
-     matrice2 = generateRandomMatrix(700, 700);
-     setTimeout(() => {
-    textMatrice.innerHTML = "Deux matrices de dimensions <b>700*700</b> ont été générées. Les valeurs des matrices sont des nombres compris entre <b>1 milliard et -1 milliard.</b>. <br>Le nombre de multiplications élementaires nécessaires pour multiplier ces deux matrices est de <b>700*700*700 = 343 000 000.</b>"
-}, 1500);
-})
-
+//Javascript
 jsButton.addEventListener("click", () => {
-     displayCalculating("javascript", true);
-     setTimeout(() => {
+      displayCalculating("javascript", true)
+      .then(()=> {
         multiplyMatricesJS(matrice1, matrice2);
-        }, 200);
+      })
 });
 
-
-  
-
-
-function generateRandomMatrix(row, col) {
-    const matrix = [];
-    for (let i = 0; i < row; i++) {
-        matrix[i] = [];
-        for (let j = 0; j < col; j++) {
-            matrix[i][j] = Math.random() * 2000000000 - 1000000000;
-        }
-    }
-    return matrix;
-}
-
-function displayCalculating(language, calculating) {
-    const calculateText = "Calcul en cours...";
-    const finishedText = "Calcul de multiplication de matrices fini."
-    const calculateTextJS =  document.querySelector(".calculating-text-js");
-    const calculateTextWASM =  document.querySelector(".calculating-text-wasm")
-    if(language === "javascript") {
-        if(calculating === true) {
-            calculateTextJS.innerHTML=calculateText
-        } else {
-            calculateTextJS.innerHTML=finishedText
-        }
-    } else {
-        if(calculating === true) {
-            calculateTextWASM.innerHTML=calculateText
-        } else {
-            calculateTextWASM.innerHTML=finishedText
-        }
-    }
-}
 
 
 function multiplyMatricesJS(matrix1, matrix2) {
@@ -123,17 +49,6 @@ function multiplyMatricesJS(matrix1, matrix2) {
 }
   
 
-// async function multiplyWithWasm(matrix1, matrix2) {
-//     const startTime = performance.now();
-//     let result = await wasmModule.multiply_matrices(matrix1, matrix2);
-//     elapsedTimeWasm = performance.now() - startTime;
-
-//     document.querySelector('.result-wasm').innerHTML = "Temps total pour multiplier les matrices :"
-//     document.querySelector('.result-number-wasm').innerHTML = elapsedTimeWasm.toFixed(2) + ` millisecondes, soit ${(elapsedTimeWasm / 1000).toFixed(2)} secondes.`;
-
-//     displayCalculating("wasm", false);
-//     return result;
-// }
 
 
 
@@ -144,25 +59,95 @@ wasmButton.addEventListener("click", () => {
         console.error("Pas encore de matrice générée.");
         throw new Error("Pas encore de matrice générée.");
     }
-    displayCalculating("wasm", true);
-    setTimeout(() => {
-        elapsedTimeWasm = multiplyMatricesWasm(matrix1, matrix2);
-    }, 200);
+    document.querySelector(".calculating-text-wasm").innerHTML="Récupération du module WASM..."
+    getWasmFunction()
+    .then(()=> {
+        console.log('module wasm chargé')
+        displayCalculating("wasm", true)
+        .then(()=> {
+            console.log('démarrage du calcul des matrices avec wasm')
+            const startTime = performance.now();
+            multiplyMatricesWasm(matrice1, matrice2)
+            elapsedTimeWasm = performance.now()-startTime
+            console.log('fin du calcul')
+            console.log(elapsedTimeWasm);
+            document.querySelector(".result-wasm").innerHTML = "Temps total pour multiplier les matrices:";
+            document.querySelector('.result-number-wasm').innerHTML = elapsedTimeWasm.toFixed(2) +` millisecondes.`;
+            displayCalculating("wasm", false);
+        })
+    })
 
-    //Ajouter ici la function
 
-    setTimeout(() => {
-document.querySelector(".result-wasm").innerHTML = "Temps total pour multiplier les matrices:";
-// document.querySelector(".result-number-wasm").innerHTML =
-//    elapsedTimeWasm.toFixed(2) + " milliseconds, or " + (elapsedTimeWasm / 1000).toFixed(2) + " seconds.";
 
-//         document.querySelector('.result-wasm').innerHTML = "Temps total pour multiplier les matrices :"
-        document.querySelector('.result-number-wasm').innerHTML = elapsedTimeWasm.toFixed(2) +` millisecondes.`;
-        displayCalculating("wasm", false);
-    }, 250);
+
 
   });
 
+  function getWasmFunction() {
+    return fetch('multiply_matrices.wasm')
+    .then(res => res.arrayBuffer())
+    .then(bytes => new WebAssembly.Instance(new WebAssembly.Module(bytes),{}))
+    .then(mod => {
+    multiplyMatricesWasm = mod.exports._Z16multiply_matricePA1000_fS0_iiii;
+    });
+}
+
+
+
+
+
+
+generateMatriceButton.addEventListener("click", () => {
+    const textMatrice = document.querySelector(".generate-matrice-text");
+    textMatrice.innerHTML= "Génération des matrices en cours..."
+     matrice1 = generateRandomMatrix(1000, 1000);
+     matrice2 = generateRandomMatrix(1000, 1000);
+     setTimeout(() => {
+    textMatrice.innerHTML = "Deux matrices de dimensions <b>1000*1000</b> ont été générées. Les valeurs des matrices sont des nombres compris entre <b>-1 milliard et 1 milliard.</b><br>Le nombre de multiplications élementaires nécessaires pour multiplier ces deux matrices est de 1000*1000*1000 =<b> 1 milliard.</b>"
+}, 1500);
+})
+
+
+function generateRandomMatrix(row, col) {
+    const matrix = [];
+    for (let i = 0; i < row; i++) {
+        matrix[i] = [];
+        for (let j = 0; j < col; j++) {
+            matrix[i][j] = Math.random() * 2000000000 - 1000000000;
+        }
+    }
+    return matrix;
+}
+
+function displayCalculating(language, calculating) {
+    const calculateText = "Calcul en cours...";
+    const finishedText = "Calcul de multiplication de matrices fini.";
+    const calculateTextJS = document.querySelector(".calculating-text-js");
+    const calculateTextWASM = document.querySelector(".calculating-text-wasm");
+    
+    return new Promise((resolve, reject) => {
+    try {
+    if (language === "javascript") {
+    if (calculating === true) {
+    calculateTextJS.innerHTML = calculateText;
+    } else {
+    calculateTextJS.innerHTML = finishedText;
+    }
+    } else {
+    if (calculating === true) {
+    calculateTextWASM.innerHTML = calculateText;
+    } else {
+    calculateTextWASM.innerHTML = finishedText;
+    }
+    }
+    setTimeout(()=> {
+        resolve();
+    },200)
+    } catch (error) {
+    reject(error);
+    }
+    });
+    }
 
 
 compareButton.addEventListener("click", () => {
@@ -184,58 +169,3 @@ compareButton.addEventListener("click", () => {
     }
     document.querySelector('.compare-text').innerHTML = `${plusRapideText}<br>${diffTemps}<br>${gainTemps}%`
 })
-
-
-
- 
-
-
-const matrix1 = matrixWasm(matrice1);
-const matrix2 = matrixWasm(matrice2);
-
-
-
-
-
-
-
-
-// #include <stdio.h>
-// #include <emscripten/emscripten.h>
-
-// int main() {
-//     printf("Hello World\n");
-//     return 0;
-// }
-
-// #ifdef __cplusplus
-// #define EXTERN extern "C"
-// #else
-// #define EXTERN
-// #endif
-
-// EXTERN EMSCRIPTEN_KEEPALIVE void myFunction(int argc, char ** argv) {
-//     printf("MyFunction Called\n");
-// }
-function matrixWasm(matrix) {
-    let row = 500;
-    let col = 500;
-    const matrixS = [];
-    for (let i = 0; i < row; i++) {
-        matrixS[i] = [];
-        for (let j = 0; j < col; j++) {
-            matrixS[i][j] = Math.random() * 2000000000 - 1000000000;
-        }
-    }
-    return (Math.random() * (0.055 - 0.05) + 0.05)*1000
-    for (let j = 0; j < col; j++) {
-        matrixS[i][j] = Math.random() * 2000000000 - 1000000000;
-    }
-  }
-
-//   fetch("simple.wasm")
-//   .then((response) => response.arrayBuffer())
-//   .then((bytes) => WebAssembly.instantiate(bytes, importObject))
-//   .then((results) => {
-//     results.instance.exports.exported_func();
-//   });
