@@ -167,5 +167,5 @@ compareButton.addEventListener("click", () => {
         diffTemps = `La différence de temps a été de : <b>${elapsedTimeJavaScript.toFixed(2)} - ${elapsedTimeWasm.toFixed(2)} = ${(elapsedTimeJavaScript-elapsedTimeWasm).toFixed(2)} millisecondes.</b>`
         gainTemps = `On a donc une meilleure performance (et un gain de temps) de <b>${((1-(elapsedTimeWasm / elapsedTimeJavaScript))*100).toFixed(2)}`
     }
-    document.querySelector('.compare-text').innerHTML = `${plusRapideText}<br>${diffTemps}<br>${gainTemps}%.</b><br>Il est donc environ <b>${Math.round(elapsedTimeJavaScript/elapsedTimeWasm)}fois plus rapide</b> que Javascript.`
+    document.querySelector('.compare-text').innerHTML = `${plusRapideText}<br>${diffTemps}<br>${gainTemps}%.</b><br>Il est donc environ <b>${Math.round(elapsedTimeJavaScript/elapsedTimeWasm)} fois plus rapide</b> que Javascript.`
 })
