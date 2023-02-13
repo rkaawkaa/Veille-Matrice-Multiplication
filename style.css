@@ -87,3 +87,21 @@
     font-weight: 400;
  }
 
+ .bigline {
+  height: 3px;
+  width: 100%;
+  background-color: grey;
+ }
+ .fineline {
+  height: 1px;
+  width: 100%;
+  background-color: grey;
+ }
+ .generate-button {
+  background-color: rgb(68, 114, 136);
+ }
+ .result-button {
+  background-color: red;
+  font-weight: bold;
+ }
+
